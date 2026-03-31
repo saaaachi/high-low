@@ -4,81 +4,76 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>High & Low Brain</title>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1299640300068792" crossorigin="anonymous"></script>
     <style>
-        * { box-sizing: border-box; }
-        html, body { 
-            margin: 0; padding: 0; width: 100%; height: 100%; 
-            overflow: hidden; background: #fafafa; font-family: 'Helvetica Neue', Arial, sans-serif; 
-            touch-action: none; position: fixed; color: #333;
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; position: fixed; touch-action: none; }
+        body { background: #f8f9fa; font-family: 'Hiragino Sans', 'Meiryo', sans-serif; display: flex; flex-direction: column; color: #333; }
         
-        /* 広告枠：上下100px固定 */
-        #ad-top, #ad-bottom { 
-            position: absolute; left: 0; width: 100%; height: 100px; 
-            background: #eee; z-index: 1000; display: flex; align-items: center; justify-content: center;
-        }
-        #ad-top { top: 0; }
-        #ad-bottom { bottom: 0; }
-        iframe { border: none; width: 320px; height: 100px; }
+        /* 上部広告：100px 固定 */
+        #ad-top { width: 100%; height: 100px; background: #eee; display: flex; align-items: center; justify-content: center; flex-shrink: 0; z-index: 100; border-bottom: 2px solid #0277bd; }
 
         /* ゲームエリア */
-        #main-container {
-            position: absolute; top: 100px; bottom: 100px; left: 0; right: 0;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: #fff; z-index: 10; padding: 20px;
-        }
+        #main-container { flex-grow: 1; position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fff; padding: 10px; }
 
-        #ui { position: absolute; top: 15px; font-size: 20px; font-weight: bold; color: #555; }
-        #instruction { font-size: 24px; font-weight: bold; color: #0277bd; margin-bottom: 30px; text-align: center; }
+        #ui { position: absolute; top: 15px; font-size: 20px; font-weight: bold; color: #555; background: rgba(255,255,255,0.8); padding: 5px 15px; border-radius: 20px; }
+        #instruction { font-size: 26px; font-weight: bold; color: #0277bd; margin-bottom: 20px; text-align: center; letter-spacing: 1px; }
         
-        /* 問題エリア */
-        #problem-area { display: flex; justify-content: center; gap: 20px; width: 100%; max-width: 400px; margin-bottom: 40px; }
+        /* 問題エリア：カードを大きく */
+        #problem-area { display: flex; justify-content: center; gap: 15px; width: 100%; max-width: 450px; }
         
         .card { 
-            flex: 1; height: 160px; background: white; border: 2px solid #ddd; border-radius: 15px;
+            flex: 1; height: 190px; background: white; border: 3px solid #e0e0e0; border-radius: 20px;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.05); transition: transform 0.1s, background 0.1s;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1); transition: transform 0.1s, background 0.1s;
             cursor: pointer; position: relative; overflow: hidden;
         }
         .card:active { transform: scale(0.95); background: #f0f0f0; }
 
-        /* トランプモードのスタイル */
-        .card.number { font-size: 80px; font-weight: 900; }
-        .card.number.suit-top { position: absolute; top: 10px; left: 10px; font-size: 20px; }
-        .card.number.suit-bottom { position: absolute; bottom: 10px; right: 10px; font-size: 20px; transform: rotate(180deg); }
+        /* カード内のスタイル（数字） */
+        .card.number { font-size: 90px; font-weight: 900; }
+        .card .suit-top { position: absolute; top: 10px; left: 10px; font-size: 24px; }
+        .card .suit-bottom { position: absolute; bottom: 10px; right: 10px; font-size: 24px; transform: rotate(180deg); }
 
-        /* 絵文字モードのスタイル */
-        .card.emoji { font-size: 32px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 15px; }
+        /* カード内のスタイル（絵文字） */
+        .card.emoji { font-size: 28px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 12px; }
 
         /* メニュー画面 */
         #menuScreen { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(255,255,255,0.98); display: flex; flex-direction: column; 
-            align-items: center; justify-content: center; z-index: 200; padding: 10px;
+            align-items: center; justify-content: center; z-index: 500; padding: 20px;
         }
         
-        #ad-middle-container { width: 320px; height: 100px; margin: 20px 0; display: none; justify-content: center; align-items: center; position: relative; border: 1px solid #ddd; }
-        #ad-cover { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 210; background: transparent; }
+        /* 【重要】収益の柱：レクタングル広告 */
+        #ad-middle-box {
+            width: 300px; height: 250px; background: #f0f0f0;
+            margin: 15px 0; display: none; justify-content: center; align-items: center;
+            border: 1px solid #ddd; border-radius: 10px; overflow: hidden;
+        }
 
-        .btn-group { display: flex; flex-direction: column; gap: 12px; width: 100%; align-items: center; }
-        .menu-btn { width: 260px; padding: 16px; font-size: 20px; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; }
-        #start-btn { background: #0277bd; color: white; box-shadow: 0 4px #01579b; }
-        #start-btn:disabled { opacity: 0; pointer-events: none; }
-        #other-games-btn { background: none; box-shadow: none; color: #aaa; text-decoration: underline; font-size: 14px; margin-top: 10px; width: auto; padding: 5px; display: block;}
+        .btn-group { display: flex; flex-direction: column; gap: 15px; width: 100%; align-items: center; }
+        .menu-btn { width: 280px; padding: 18px; font-size: 22px; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; transition: 0.2s; }
+        #start-btn { background: #0277bd; color: white; box-shadow: 0 5px #01579b; }
+        #start-btn:disabled { background: #bbb; box-shadow: none; color: #777; }
+        .sub-btn { background: #ff4081; color: white; box-shadow: 0 5px #c2185b; font-size: 16px; }
 
-        /* 大広告 */
-        #bigAdScreen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 3000; display: none; justify-content: center; align-items: center; }
-        .ad-frame-wrapper { width: 300px; height: 250px; position: relative; background: white; border-radius: 8px; }
-        .ad-close-btn { position: absolute; top: -20px; right: -20px; color: white; font-size: 20px; font-weight: bold; cursor: pointer; background: #333; width: 44px; height: 44px; border-radius: 50%; display: none; align-items: center; justify-content: center; z-index: 3100; border: 2px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        /* インタースティシャル */
+        #inter-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 99999; align-items: center; justify-content: center; }
+        .inter-content { width: 330px; height: 350px; background: #fff; position: relative; border-radius: 15px; }
+        #close-ad-btn { position: absolute; top: -55px; right: 0; width: 45px; height: 45px; background: #333; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; border: 2px solid #fff; cursor: pointer; }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-    <div id="ad-top"><iframe src="ad.html"></iframe></div>
+    <div id="ad-top">
+        <ins class="adsbygoogle" style="display:inline-block;width:320px;height:100px" data-ad-client="ca-pub-1299640300068792" data-ad-slot="3972022911"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
 
     <div id="main-container">
         <div id="ui">TIME: 15.0 | SCORE: 0</div>
-        <div id="instruction">「大きい」方をタップ！</div>
+        <div id="instruction">準備はいい？</div>
         
         <div id="problem-area">
             <div id="card-left" class="card" onclick="checkAnswer('left')"></div>
@@ -86,32 +81,30 @@
         </div>
 
         <div id="menuScreen">
-            <h1 id="menu-title" style="color:#0277bd; margin:0; font-size: 28px; font-style: italic;">HIGH & LOW BRAIN</h1>
-            <p id="menu-desc" style="margin:10px 0; color:#666; text-align:center; line-height: 1.4;">瞬時に判断！<br>数字や数が多い方をタップせよ！<br><b>BEST: <span id="best-score">0</span></b></p>
+            <h1 id="menu-title" style="color:#0277bd; margin:0; font-size: 32px; letter-spacing: -1px;">HIGH & LOW BRAIN</h1>
+            <p id="menu-desc" style="margin:10px 0; color:#666; text-align:center;">
+                瞬時に判断！指定された方をタップ！<br>
+                <b>ハイスコア: <span id="best-score">0</span></b>
+            </p>
             
-            <div id="ad-middle-container">
-                <div id="ad-cover"></div>
-                <div id="im-c9675ed8ad4d49f2b1360ac594aa00ca">
-                    <script async src="https://imp-adedge.i-mobile.co.jp/script/v1/spot.js?20220104"></script>
-                    <script>(window.adsbyimobile=window.adsbyimobile||[]).push({pid:84561,mid:590804,asid:1924211,type:"banner",display:"inline",elementid:"im-c9675ed8ad4d49f2b1360ac594aa00ca"})</script>
-                </div>
+            <div id="ad-middle-box">
+                <ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px" data-ad-client="ca-pub-1299640300068792" data-ad-slot="9050127185"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
             </div>
 
             <div class="btn-group">
                 <button id="start-btn" class="menu-btn" onclick="startGame()">★ START ★</button>
-                <a href="https://saaaachi.github.io/" class="menu-btn" id="other-games-btn">他のゲームはこちら</a>
+                <a href="https://saaaachi.github.io/" class="sub-btn menu-btn">他のゲームで遊ぶ</a>
             </div>
         </div>
 
-        <div id="bigAdScreen">
-            <div class="ad-frame-wrapper">
-                <div id="ad-close-btn" class="ad-close-btn" onclick="closeBigAd()"></div>
-                <iframe id="ad-large-frame" src="" style="width:300px; height:250px;"></iframe>
+        <div id="inter-screen">
+            <div class="inter-content">
+                <div id="close-ad-btn" onclick="closeInterAd()">5</div>
+                <iframe id="ifr-inter" src="about:blank" style="width:100%; height:100%; border:none; border-radius:15px; background:#fff;"></iframe>
             </div>
         </div>
     </div>
-
-    <div id="ad-bottom"><iframe src="ad.html"></iframe></div>
 
     <script>
         const emojis = ["🍎", "🐱", "⭐️", "💎", "👻", "⚽️"];
@@ -121,48 +114,58 @@
         let timeLeft = 15, timer, gameActive = false, correctSide = "", currentMode = "";
         let valLeft, valRight;
 
-        const cardLeft = document.getElementById("card-left"), cardRight = document.getElementById("card-right"), ui = document.getElementById("ui"), insText = document.getElementById("instruction"), menuScreen = document.getElementById("menuScreen"), adMid = document.getElementById("ad-middle-container"), adCover = document.getElementById("ad-cover"), startBtn = document.getElementById("start-btn"), bestUi = document.getElementById("best-score"), otherGamesBtn = document.getElementById("other-games-btn");
+        const cardLeft = document.getElementById("card-left"), 
+              cardRight = document.getElementById("card-right"), 
+              ui = document.getElementById("ui"), 
+              insText = document.getElementById("instruction"), 
+              menuScreen = document.getElementById("menuScreen"), 
+              adMid = document.getElementById("ad-middle-box"), 
+              startBtn = document.getElementById("start-btn"), 
+              bestUi = document.getElementById("best-score");
 
         bestUi.innerText = bestScore;
 
         function startGame() {
-            menuScreen.style.display = "none"; adMid.style.display = "none";
+            menuScreen.style.display = "none"; 
+            adMid.style.display = "none";
             score = 0; timeLeft = 15; gameActive = true;
             nextQuestion();
-            timer = setInterval(() => { timeLeft -= 0.1; ui.innerText = `TIME: ${Math.max(0, timeLeft).toFixed(1)} | SCORE: ${score}`; if(timeLeft <= 0) gameOver(); }, 100);
+            timer = setInterval(() => { 
+                timeLeft -= 0.1; 
+                ui.innerText = `TIME: ${Math.max(0, timeLeft).toFixed(1)} | SCORE: ${score}`; 
+                if(timeLeft <= 0) gameOver(); 
+            }, 100);
         }
 
         function nextQuestion() {
-            // モード決定: 0=数字, 1=絵文字
             currentMode = Math.random() > 0.5 ? "number" : "emoji";
+            valLeft = Math.floor(Math.random() * 12) + 1;
+            do { valRight = Math.floor(Math.random() * 12) + 1; } while(valLeft === valRight);
             
-            // 値の決定（1〜13、重なりなし）
-            valLeft = Math.floor(Math.random() * 13) + 1;
-            do { valRight = Math.floor(Math.random() * 13) + 1; } while(valLeft === valRight);
+            const isHigh = Math.random() > 0.3; 
+            insText.innerText = isHigh ? "「大きい」方をタップ！" : "「小さい」方をタップ！";
             
-            // 指示決定: 0=大きい, 1=小さい
-            const insMode = Math.random() > 0.3 ? "大きい" : "小さい"; // 大きい方をタップさせる率を高める
-            insText.innerText = `「${insMode}」方をタップ！`;
-            
-            if(insMode === "大きい") { correctSide = valLeft > valRight ? "left" : "right"; }
+            if(isHigh) { correctSide = valLeft > valRight ? "left" : "right"; }
             else { correctSide = valLeft < valRight ? "left" : "right"; }
 
-            // カードの描画
             renderCard(cardLeft, valLeft);
             renderCard(cardRight, valRight);
         }
 
         function renderCard(cardEl, value) {
             cardEl.innerHTML = "";
-            cardEl.className = "card"; // リセット
+            cardEl.className = "card";
+            cardEl.style.background = "white";
 
             if(currentMode === "number") {
                 cardEl.classList.add("number");
                 const suit = suits[Math.floor(Math.random() * suits.length)];
-                if(suit === "♥️" || suit === "♦️") cardEl.style.color = "#f44336"; else cardEl.style.color = "#333";
+                cardEl.style.color = (suit === "♥️" || suit === "♦️") ? "#f44336" : "#333";
                 
                 let displayVal = value;
-                if(value === 1) displayVal = "A"; else if(value === 11) displayVal = "J"; else if(value === 12) displayVal = "Q"; else if(value === 13) displayVal = "K";
+                if(value === 1) displayVal = "A"; 
+                else if(value === 11) displayVal = "J"; 
+                else if(value === 12) displayVal = "Q";
                 
                 cardEl.innerHTML = `<div class="suit-top">${suit}</div>${displayVal}<div class="suit-bottom">${suit}</div>`;
             } else {
@@ -172,54 +175,75 @@
                 let emojiStr = "";
                 for(let i=0; i<value; i++) emojiStr += `<div>${emoji}</div>`;
                 cardEl.innerHTML = emojiStr;
-                // 数が多い場合のフォントサイズ調整
-                if(value > 9) cardEl.style.fontSize = "22px"; else if(value > 6) cardEl.style.fontSize = "26px"; else cardEl.style.fontSize = "32px";
+                cardEl.style.fontSize = value > 9 ? "22px" : value > 6 ? "26px" : "32px";
             }
         }
 
         function checkAnswer(side) {
             if(!gameActive) return;
             if(side === correctSide) {
-                score++; timeLeft += 0.7; // 正解で0.7秒回復
-                // 正解アニメーション（一瞬緑に）
-                const correctCard = side === "left" ? cardLeft : cardRight;
-                correctCard.style.background = "#c8e6c9";
-                setTimeout(() => nextQuestion(), 50);
+                score++; 
+                timeLeft += 0.6; // 難易度調整のため少し回復量を減
+                nextQuestion();
             } else {
-                timeLeft -= 2.5; // ミスで2.5秒マイナス
-                // 不正解アニメーション（画面揺れ）
-                document.getElementById("problem-area").style.transform = "translateX(15px)";
-                setTimeout(() => document.getElementById("problem-area").style.transform = "translateX(-15px)", 50);
+                timeLeft -= 2.0;
+                document.getElementById("problem-area").style.transform = "translateX(10px)";
+                setTimeout(() => document.getElementById("problem-area").style.transform = "translateX(-10px)", 50);
                 setTimeout(() => document.getElementById("problem-area").style.transform = "translateX(0)", 100);
             }
         }
 
         function gameOver() {
-            gameActive = false; clearInterval(timer); playCount++;
-            if(score > bestScore) { bestScore = score; localStorage.setItem("high_low_brain_best", bestScore); bestUi.innerText = bestScore; }
+            gameActive = false; 
+            clearInterval(timer); 
+            playCount++;
+            if(score > bestScore) { 
+                bestScore = score; 
+                localStorage.setItem("high_low_brain_best", bestScore); 
+                bestUi.innerText = bestScore; 
+            }
             
             document.getElementById("menu-title").innerText = "TIME UP!";
-            document.getElementById("menu-desc").innerHTML = `SCORE: <span style="font-size:24px; color:#f44336;">${score}</span><br>BEST: ${bestScore}`;
+            document.getElementById("menu-desc").innerHTML = `SCORE: <span style="font-size:28px; color:#f44336;">${score}</span><br>BEST: ${bestScore}`;
             
             startBtn.disabled = true;
-            // 他のゲームはこちらを「控えめな戻るリンク」に変更
-            otherGamesBtn.style.cssText = "display:block; font-size:14px; background:none; box-shadow:none; color:#aaa; text-decoration:underline; margin-top:10px; width:auto; padding:5px;";
-            otherGamesBtn.innerText = "まとめサイトへ戻る";
+            startBtn.innerText = "お待ちください...";
+            adMid.style.display = "flex"; 
+            menuScreen.style.display = "flex";
 
-            adMid.style.display = "flex"; adCover.style.display = "block"; menuScreen.style.display = "flex";
+            // 1.5秒ガード
+            setTimeout(() => { 
+                startBtn.disabled = false; 
+                startBtn.innerText = "★ RETRY ★"; 
+            }, 1500);
 
-            setTimeout(() => { adCover.style.display = "none"; startBtn.disabled = false; startBtn.innerText = "★ RETRY ★"; }, 1500);
-            if (playCount === 2 || (playCount > 2 && (playCount - 2) % 5 === 0)) setTimeout(showBigAd, 400);
+            if (playCount % 3 === 0) setTimeout(showInterAd, 600);
         }
 
-        function showBigAd() {
-            const screen = document.getElementById("bigAdScreen"), closeBtn = document.getElementById("ad-close-btn");
-            document.getElementById("ad-large-frame").src = "ad.large.html?t=" + Date.now();
+        function showInterAd() {
+            const screen = document.getElementById("inter-screen"), 
+                  closeBtn = document.getElementById("close-ad-btn"), 
+                  ifr = document.getElementById('ifr-inter');
+            ifr.src = './ad.large.html?v=' + Date.now();
             screen.style.display = "flex";
-            let count = 5; closeBtn.style.display = "flex"; closeBtn.innerText = count; closeBtn.style.pointerEvents = "none";
-            const countInt = setInterval(() => { count--; closeBtn.innerText = count; if(count <= 0) { clearInterval(countInt); closeBtn.innerText = "×"; closeBtn.style.pointerEvents = "auto"; } }, 1000);
+            let count = 5;
+            closeBtn.innerText = count;
+            closeBtn.style.pointerEvents = "none";
+            const itv = setInterval(() => {
+                count--;
+                if(count > 0) closeBtn.innerText = count;
+                else {
+                    clearInterval(itv);
+                    closeBtn.innerText = "×";
+                    closeBtn.style.pointerEvents = "auto";
+                }
+            }, 1000);
         }
-        function closeBigAd() { document.getElementById("bigAdScreen").style.display = "none"; document.getElementById("ad-large-frame").src = ""; }
+
+        function closeInterAd() {
+            document.getElementById("inter-screen").style.display = "none";
+            document.getElementById('ifr-inter').src = 'about:blank';
+        }
     </script>
 </body>
 </html>
